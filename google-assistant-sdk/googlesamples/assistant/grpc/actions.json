@@ -1,0 +1,54 @@
+{
+    "manifest": {
+        "displayName": "Youtube Music",
+        "invocationName": "Youtube music",
+        "category": "PRODUCTIVITY"
+    },
+    "actions": [
+        {
+            "name": "com.example.actions.YoutubeMusic",
+            "availability": {
+                "deviceClasses": [
+                    {
+                        "assistantSdkDevice": {}
+                    }
+                ]
+            },
+            "intent": {
+                "name": "com.example.intents.YoutubeMusic",
+                "parameters": [
+                    {
+                        "name": "keyword",
+                        "type": "SchemaOrg_Text"
+                    }
+                ],
+                "trigger": {
+                    "queryPatterns": [
+                        "play $SchemaOrg_Text:keyword on youtube music"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "staticFulfillment": {
+                    "templatedResponse": {
+                        "items": [
+                            {
+                                "simpleResponse": {
+                                    "textToSpeech": "Playing $keyword from Youtube Music"
+                                }
+                            },
+                            {
+                                "deviceExecution": {
+                                    "command": "com.example.commands.YoutubeMusic",
+                                    "params": {
+                                        "keyword": "$keyword"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ] 
+}

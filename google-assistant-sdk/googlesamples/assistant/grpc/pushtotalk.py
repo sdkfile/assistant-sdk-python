@@ -424,6 +424,11 @@ def main(api_endpoint, credentials, project_id,
             logging.info('Turning device on')
         else:
             logging.info('Turning device off')
+    
+    @device_handler.command('action.devices.commands.YoutubeMusic')
+    def youtube_music(keyword):
+      logging.info(f"Searching {keyword}")
+
 
     @device_handler.command('com.example.commands.BlinkLight')
     def blink(speed, number):
