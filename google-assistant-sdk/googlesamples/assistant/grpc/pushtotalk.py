@@ -26,6 +26,8 @@ import uuid
 
 import click
 import grpc
+import vlc
+import youtube_dl
 import google.auth.transport.grpc
 import google.auth.transport.requests
 import google.oauth2.credentials
@@ -49,6 +51,15 @@ except (SystemError, ImportError):
     import browser_helpers
     import device_helpers
 
+
+ydl_opts = {
+    'default_search': 'ytsearch1:',
+    'format': 'bestaudio/best',
+    'noplaylist': True,
+    'quiet': True
+}
+vlc_instance = vlc.get_default_instance()
+vlc_player = vlc_instance.media_player_new()
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.AssistResponse.END_OF_UTTERANCE
@@ -418,17 +429,26 @@ def main(api_endpoint, credentials, project_id,
 
     device_handler = device_helpers.DeviceRequestHandler(device_id)
 
-    @device_handler.command('action.devices.commands.OnOff')
-    def onoff(on):
-        if on:
+    @device_handler.command('action.devices.commands.StartStop')
+    def startstop(start):
+        if start:
             logging.info('Turning device on')
+            try:
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    meta = ydl.extract_info("lofi", download=False)
+            except Exception:
+                logging.info('Sorry no info')
+                return
+
+            if meta:
+                info = meta['entries'][0]
+                vlc_player.set_media(vlc_instance.media_new(info['url']))
+                vlc_player.play()
+
         else:
             logging.info('Turning device off')
-    
-    @device_handler.command('action.devices.commands.YoutubeMusic')
-    def youtube_music(keyword):
-      logging.info(f"Searching {keyword}")
-
+            if vlc_player.is_playing():
+                vlc_player.stop()
 
     @device_handler.command('com.example.commands.BlinkLight')
     def blink(speed, number):
